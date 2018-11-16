@@ -1,0 +1,17 @@
+sudo: required
+services:
+ - docker
+before_install:
+ - docker build -t yankostefanov/react-test -f ./client/Dockerfile.dev ./client
+script:
+ - docker run yankostefanov/react-test npm run test -- --coverage
+after_success:
+ - docker build -t yankostefanov/multi-client ./client
+ - docker build -t yankostefanov/multi-nginx ./nginx
+ - docker build -t yankostefanov/multi-server ./server
+ - docker build -t yankostefanov/multi-worker ./worker
+ - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+ - docker push yankostefanov/multi-client
+ - docker push yankostefanov/multi-nginx
+ - docker push yankostefanov/multi-server
+ - docker push yankostefanov/multi-worker
